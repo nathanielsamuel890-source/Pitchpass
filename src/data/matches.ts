@@ -28,7 +28,9 @@ const SECTIONS = ["Main Stand", "East Stand", "West Stand", "North End", "Family
 
 function hashStr(s: string) {
   let hash = 0;
-  for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < s.length; i++) {
+    hash = (s.charCodeAt(i) + ((hash << 5) - hash)) | 0; // keep hash within 32-bit range every step
+  }
   return Math.abs(hash);
 }
 
