@@ -12,8 +12,8 @@ const MANUAL_FIXTURES = [
     competition: "FIFA World Cup",
     home: "France",
     away: "Spain",
-    homeCrest: null,
-    awayCrest: null,
+    homeCrest: "https://flagcdn.com/w80/fr.png",
+    awayCrest: "https://flagcdn.com/w80/es.png",
     utcDate: "2026-07-14T19:00:00Z",
     date: "14 Jul 2026",
     time: "3:00 PM ET",
@@ -24,8 +24,8 @@ const MANUAL_FIXTURES = [
     competition: "FIFA World Cup",
     home: "England",
     away: "Argentina",
-    homeCrest: null,
-    awayCrest: null,
+    homeCrest: "https://flagcdn.com/w80/gb-eng.png",
+    awayCrest: "https://flagcdn.com/w80/ar.png",
     utcDate: "2026-07-15T19:00:00Z",
     date: "15 Jul 2026",
     time: "3:00 PM ET",
@@ -92,7 +92,13 @@ export default async function handler(req, res) {
         venue: m.venue || `${m.competition?.area?.name ?? ""}`.trim() || "Venue TBC",
       }));
 
-    const matches = [...MANUAL_FIXTURES, ...apiMatches];
+    // Auto-hide manual fixtures once their kickoff time has passed
+    const now = new Date();
+    const activeManualFixtures = MANUAL_FIXTURES.filter(
+      (f) => new Date(f.utcDate) > now
+    );
+
+    const matches = [...activeManualFixtures, ...apiMatches];
 
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate"); // cache 30 min
     return res.status(200).json({ matches });
