@@ -40,6 +40,7 @@ export default async function handler(req, res) {
         away: m.awayTeam?.shortName ?? m.awayTeam?.name ?? "Away",
         homeCrest: m.homeTeam?.crest ?? null,
         awayCrest: m.awayTeam?.crest ?? null,
+        utcDate: m.utcDate,
         date: new Date(m.utcDate).toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",

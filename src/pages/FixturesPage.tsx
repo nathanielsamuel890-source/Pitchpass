@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
-import { Search, ShieldCheck, Calendar, TrendingDown, Trophy, MapPin, Loader2 } from "lucide-react";
-import { Fixture, Match, attachPlaceholderPricing } from "../data/matches";
+import {
+  Search,
+  ShieldCheck,
+  Calendar,
+  TrendingDown,
+  TrendingUp,
+  Trophy,
+  MapPin,
+  Loader2,
+  X,
+  Users,
+  LayoutGrid,
+  List as ListIcon,
+} from "lucide-react";
+import { Fixture, Match, PriceTier, attachPlaceholderPricing } from "../data/matches";
 import { whatsappOrderUrl } from "../lib/whatsapp";
 
 const STATS = [
@@ -10,11 +23,18 @@ const STATS = [
   { icon: Trophy, value: "4+", label: "Competitions Covered" },
 ];
 
+const QUANTITY_OPTIONS = ["1", "2", "3", "4", "5", "5+"];
+
 export default function FixturesPage() {
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [quantityFor, setQuantityFor] = useState<Match | null>(null);
+  const [selectedTier, setSelectedTier] = useState<PriceTier | null>(null);
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const [category, setCategory] = useState<string | null>(null);
+  const [sort, setSort] = useState<"soonest" | "price-low" | "price-high">("soonest");
 
   useEffect(() => {
     let cancelled = false;
@@ -40,13 +60,25 @@ export default function FixturesPage() {
     };
   }, []);
 
-  const filtered = query
-    ? matches.filter(
-        (m) =>
-          m.home.toLowerCase().includes(query.toLowerCase()) ||
-          m.away.toLowerCase().includes(query.toLowerCase())
-      )
-    : matches;
+  const competitions = Array.from(new Set(matches.map((m) => m.competition)));
+
+  const filtered = matches
+    .filter((m) => {
+      const q = query.toLowerCase();
+      const matchesQuery = query
+        ? m.home.toLowerCase().includes(q) ||
+          m.away.toLowerCase().includes(q) ||
+          m.venue.toLowerCase().includes(q) ||
+          m.competition.toLowerCase().includes(q)
+        : true;
+      const matchesCategory = category ? m.competition === category : true;
+      return matchesQuery && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (sort === "price-low") return a.fromPrice - b.fromPrice;
+      if (sort === "price-high") return b.fromPrice - a.fromPrice;
+      return new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime(); // soonest
+    });
 
   return (
     <main>
@@ -70,7 +102,7 @@ export default function FixturesPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by team, match, or stadium... e.g. Real Madrid"
+              placeholder="Search by team, competition, or stadium... e.g. Real Madrid"
               className="flex-1 bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
             />
           </div>
@@ -107,6 +139,35 @@ export default function FixturesPage() {
 
       {/* High-demand matches */}
       <section className="max-w-3xl mx-auto px-6 py-10">
+        {/* Browse by competition */}
+        {competitions.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1">
+            <button
+              onClick={() => setCategory(null)}
+              className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                category === null
+                  ? "border-brand bg-blue-50 text-brand"
+                  : "border-border text-muted hover:border-brand"
+              }`}
+            >
+              All
+            </button>
+            {competitions.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c === category ? null : c)}
+                className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                  category === c
+                    ? "border-brand bg-blue-50 text-brand"
+                    : "border-border text-muted hover:border-brand"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-ink">High-Demand Matches</h2>
@@ -114,33 +175,114 @@ export default function FixturesPage() {
               The most sought-after tickets on the market right now.
             </p>
           </div>
-          <button className="hidden sm:flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm font-medium text-ink hover:bg-page transition-colors whitespace-nowrap">
-            View all matches →
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as typeof sort)}
+              className="rounded-full border border-border bg-panel px-3 py-1.5 text-sm text-ink focus:outline-none"
+            >
+              <option value="soonest">Soonest</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+            <div className="flex items-center gap-1 rounded-full border border-border p-1">
+              <button
+                onClick={() => setView("grid")}
+                aria-label="Grid view"
+                className={`rounded-full p-1.5 transition-colors ${
+                  view === "grid" ? "bg-blue-50 text-brand" : "text-muted"
+                }`}
+              >
+                <LayoutGrid size={16} />
+              </button>
+              <button
+                onClick={() => setView("list")}
+                aria-label="List view"
+                className={`rounded-full p-1.5 transition-colors ${
+                  view === "list" ? "bg-blue-50 text-brand" : "text-muted"
+                }`}
+              >
+                <ListIcon size={16} />
+              </button>
+            </div>
+          </div>
         </div>
 
+        {loading && (
+          <div className="flex items-center justify-center gap-2 text-muted py-10">
+            <Loader2 size={18} className="animate-spin" /> Loading live fixtures...
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-border bg-panel p-6 text-center text-sm text-muted">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && filtered.length === 0 && (
+          <div className="rounded-xl border border-border bg-panel p-6 text-center text-sm text-muted">
+            No upcoming fixtures found.
+          </div>
+        )}
+
+        {!loading && !error && filtered.length > 0 && view === "list" && (
+          <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
+            {filtered.map((m) => {
+              const d = new Date(m.utcDate);
+              const dayNum = d.getDate();
+              const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
+              const month = d.toLocaleDateString("en-GB", { month: "short" });
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => {
+                    setQuantityFor(m);
+                    setSelectedTier(m.tiers[m.tiers.length - 1]);
+                  }}
+                  className="flex items-center gap-4 bg-panel px-4 py-3 text-left hover:bg-page transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center w-12 shrink-0">
+                    <span className="text-xs text-muted uppercase">{month}</span>
+                    <span className="text-lg font-bold text-ink leading-none">{dayNum}</span>
+                    <span className="text-xs text-muted">{weekday}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-ink truncate">
+                      {m.home} vs {m.away}
+                    </p>
+                    <p className="text-xs text-muted truncate">
+                      {m.competition} · {m.time} · {m.venue}
+                    </p>
+                    {m.priceTrend === "up" && (
+                      <span className="inline-flex items-center gap-1 text-xs text-red-500 mt-0.5">
+                        <TrendingUp size={12} /> Prices increasing soon
+                      </span>
+                    )}
+                    {m.priceTrend === "down" && (
+                      <span className="inline-flex items-center gap-1 text-xs text-savings mt-0.5">
+                        <TrendingDown size={12} /> Prices dropped
+                      </span>
+                    )}
+                    {m.priceTrend === "stable" && (
+                      <span className="inline-flex items-center gap-1 text-xs text-muted mt-0.5">
+                        <Users size={12} /> {m.viewers} people viewing
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs text-muted">From</p>
+                    <p className="font-bold text-brand">£{m.fromPrice.toFixed(2)}+</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && !error && filtered.length > 0 && view === "grid" && (
         <div className="grid sm:grid-cols-2 gap-4">
-          {loading && (
-            <div className="col-span-2 flex items-center justify-center gap-2 text-muted py-10">
-              <Loader2 size={18} className="animate-spin" /> Loading live fixtures...
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="col-span-2 rounded-xl border border-border bg-panel p-6 text-center text-sm text-muted">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && filtered.length === 0 && (
-            <div className="col-span-2 rounded-xl border border-border bg-panel p-6 text-center text-sm text-muted">
-              No upcoming fixtures found.
-            </div>
-          )}
-
-          {!loading &&
-            !error &&
-            filtered.map((m) => (
+          {filtered.map((m) => (
             <div
               key={m.id}
               className="rounded-xl border border-border bg-panel p-5 hover:shadow-md transition-shadow"
@@ -225,17 +367,86 @@ export default function FixturesPage() {
                     </span>
                   </p>
                 </div>
-                <a
-                  href={whatsappOrderUrl(m)}
+                <button
+                  onClick={() => {
+                    setQuantityFor(m);
+                    setSelectedTier(m.tiers[m.tiers.length - 1]);
+                  }}
                   className="rounded-full bg-brand text-white text-sm font-semibold px-5 py-2 hover:brightness-110 transition-all"
                 >
                   Buy Ticket
-                </a>
+                </button>
               </div>
             </div>
           ))}
         </div>
+        )}
       </section>
+
+      {quantityFor && selectedTier && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
+          onClick={() => setQuantityFor(null)}
+        >
+          <div
+            className="w-full sm:max-w-sm rounded-2xl bg-panel p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-semibold text-ink">Choose your seats</h3>
+              <button
+                onClick={() => setQuantityFor(null)}
+                className="text-muted hover:text-ink"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-muted mb-4">
+              {quantityFor.home} vs {quantityFor.away}
+            </p>
+
+            <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+              Seating tier
+            </p>
+            <div className="flex flex-col gap-2 mb-5">
+              {quantityFor.tiers.map((tier) => (
+                <button
+                  key={tier.label}
+                  onClick={() => setSelectedTier(tier)}
+                  className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
+                    selectedTier.label === tier.label
+                      ? "border-brand bg-blue-50"
+                      : "border-border hover:border-brand"
+                  }`}
+                >
+                  <span className="font-medium text-ink">{tier.label}</span>
+                  <span className="font-bold text-brand">£{tier.price.toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+              How many tickets?
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {QUANTITY_OPTIONS.map((q) => (
+                <a
+                  key={q}
+                  href={whatsappOrderUrl(quantityFor, q, selectedTier)}
+                  onClick={() => setQuantityFor(null)}
+                  className="flex items-center justify-center rounded-xl border border-border py-3 text-ink font-semibold hover:border-brand hover:text-brand hover:bg-blue-50 transition-colors"
+                >
+                  {q}
+                </a>
+              ))}
+            </div>
+            <p className="flex items-center justify-center gap-1 text-xs text-muted mt-4">
+              <ShieldCheck size={13} className="text-savings" /> Verified sellers · Secure checkout
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

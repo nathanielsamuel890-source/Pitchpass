@@ -5,9 +5,16 @@ export type Fixture = {
   away: string;
   homeCrest: string | null;
   awayCrest: string | null;
+  utcDate: string;
   date: string;
   time: string;
   venue: string;
+};
+
+export type PriceTier = {
+  label: string;
+  price: number;
+  originalPrice: number;
 };
 
 export type Match = Fixture & {
@@ -20,6 +27,9 @@ export type Match = Fixture & {
   discountPct: number;
   seller: string;
   section: string;
+  tiers: PriceTier[];
+  viewers: number;
+  priceTrend: "up" | "down" | "stable";
 };
 
 const COLORS = ["#C8102E", "#1E5AA8", "#A50044", "#EE2523", "#5E5CE6", "#16A34A", "#DB7A00"];
@@ -40,6 +50,16 @@ function colorFor(name: string) {
 
 const DISCOUNTS = [10, 15, 18, 22, 25, 28, 32, 35, 40];
 
+// Pitch-side seats cost more than upper-tier ones — same pattern as real
+// stadium seat maps (SeatPick, etc). "originalPrice"/"fromPrice" on a Match
+// always reflect the cheapest (Upper Tier) price, matching how ticket
+// sites show a "From £X" headline price on the card.
+const TIERS = [
+  { label: "Pitch Side", mult: 1.9 },
+  { label: "Lower Tier", mult: 1.3 },
+  { label: "Upper Tier", mult: 1 },
+];
+
 /**
  * PLACEHOLDER PRICING — no free API provides real ticket/seller prices.
  * This generates plausible-looking numbers so the layout has something
@@ -49,9 +69,15 @@ const DISCOUNTS = [10, 15, 18, 22, 25, 28, 32, 35, 40];
 export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
   return fixtures.map((f, i) => {
     const priceHash = hashStr(f.id + f.home + f.away);
-    const original = 45 + (priceHash % 280); // £45–£325 spread
+    const original = 45 + (priceHash % 280); // £45–£325 spread (Upper Tier)
     const discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
     const fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
+    const tiers: PriceTier[] = TIERS.map((t) => {
+      const tierOriginal = Math.round(original * t.mult);
+      const tierPrice = Math.round(tierOriginal * (1 - discountPct / 100) * 10) / 10;
+      return { label: t.label, price: tierPrice, originalPrice: tierOriginal };
+    });
+    const trendRoll = (priceHash >> 4) % 3;
     return {
       ...f,
       hot: i < 4,
@@ -63,6 +89,9 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       discountPct,
       seller: SELLER_NAMES[priceHash % SELLER_NAMES.length],
       section: SECTIONS[(priceHash >> 2) % SECTIONS.length],
+      tiers,
+      viewers: 20 + (priceHash % 400),
+      priceTrend: trendRoll === 0 ? "up" : trendRoll === 1 ? "down" : "stable",
     };
   });
 }
