@@ -1,3 +1,5 @@
+import { MANUAL_PRICES } from "./manualPrices";
+
 export type Fixture = {
   id: string;
   competition: string;
@@ -60,23 +62,46 @@ const TIERS = [
   { label: "Upper Tier", mult: 1 },
 ];
 
-/**
- * PLACEHOLDER PRICING — no free API provides real ticket/seller prices.
- * This generates plausible-looking numbers so the layout has something
- * to show. Replace with real data once you have a seller/pricing source
- * (either your own listings or a paid ticket marketplace API).
- */
+const MANUAL_LOOKUP = Object.fromEntries(
+  Object.entries(MANUAL_PRICES).map(([k, v]) => [k.toLowerCase().trim(), v])
+);
+
 export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
   return fixtures.map((f, i) => {
     const priceHash = hashStr(f.id + f.home + f.away);
-    const original = 45 + (priceHash % 280); // £45–£325 spread (Upper Tier)
-    const discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
-    const fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
-    const tiers: PriceTier[] = TIERS.map((t) => {
-      const tierOriginal = Math.round(original * t.mult);
-      const tierPrice = Math.round(tierOriginal * (1 - discountPct / 100) * 10) / 10;
-      return { label: t.label, price: tierPrice, originalPrice: tierOriginal };
-    });
+    const manual = MANUAL_LOOKUP[`${f.home} vs ${f.away}`.toLowerCase().trim()];
+
+    let original: number;
+    let discountPct: number;
+    let fromPrice: number;
+    let tiers: PriceTier[];
+
+    if (manual) {
+      discountPct = manual.discountPct ?? 0;
+      const withDiscount = (real: number) =>
+        discountPct > 0 ? Math.round((real / (1 - discountPct / 100)) * 10) / 10 : real;
+      tiers = [
+        { label: "Pitch Side", price: manual.pitchSide, originalPrice: withDiscount(manual.pitchSide) },
+        { label: "Lower Tier", price: manual.lowerTier, originalPrice: withDiscount(manual.lowerTier) },
+        { label: "Upper Tier", price: manual.upperTier, originalPrice: withDiscount(manual.upperTier) },
+      ];
+      original = tiers[2].originalPrice;
+      fromPrice = manual.upperTier;
+    } else {
+      // PLACEHOLDER PRICING — no free API provides real ticket/seller prices.
+      // This generates plausible-looking numbers so the layout has something
+      // to show. Add a real price in manualPrices.ts to override this for
+      // any specific match.
+      original = 45 + (priceHash % 280); // £45–£325 spread (Upper Tier)
+      discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
+      fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
+      tiers = TIERS.map((t) => {
+        const tierOriginal = Math.round(original * t.mult);
+        const tierPrice = Math.round(tierOriginal * (1 - discountPct / 100) * 10) / 10;
+        return { label: t.label, price: tierPrice, originalPrice: tierOriginal };
+      });
+    }
+
     const trendRoll = (priceHash >> 4) % 3;
     return {
       ...f,
