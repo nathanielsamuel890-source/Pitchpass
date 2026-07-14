@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, ShieldCheck, Calendar, TrendingDown, Trophy, MapPin, Loader2 } from "lucide-react";
 import { Fixture, Match, attachPlaceholderPricing } from "../data/matches";
+import { whatsappOrderUrl } from "../lib/whatsapp";
 
 const STATS = [
   { icon: ShieldCheck, value: "6+", label: "Verified Sellers Compared" },
@@ -157,22 +158,44 @@ export default function FixturesPage() {
 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex flex-col items-center gap-1.5 w-20">
-                  <span
-                    className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: m.homeColor }}
-                  >
-                    {m.home.slice(0, 2).toUpperCase()}
-                  </span>
+                  {m.homeCrest ? (
+                    <img
+                      src={m.homeCrest}
+                      alt={m.home}
+                      className="h-10 w-10 object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span
+                      className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                      style={{ backgroundColor: m.homeColor }}
+                    >
+                      {m.home.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
                   <span className="text-xs font-medium text-ink text-center">{m.home}</span>
                 </div>
                 <span className="text-muted text-xs">vs</span>
                 <div className="flex flex-col items-center gap-1.5 w-20">
-                  <span
-                    className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: m.awayColor }}
-                  >
-                    {m.away.slice(0, 2).toUpperCase()}
-                  </span>
+                  {m.awayCrest ? (
+                    <img
+                      src={m.awayCrest}
+                      alt={m.away}
+                      className="h-10 w-10 object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span
+                      className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                      style={{ backgroundColor: m.awayColor }}
+                    >
+                      {m.away.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
                   <span className="text-xs font-medium text-ink text-center">{m.away}</span>
                 </div>
               </div>
@@ -202,9 +225,12 @@ export default function FixturesPage() {
                     </span>
                   </p>
                 </div>
-                <button className="rounded-full bg-brand text-white text-sm font-semibold px-5 py-2 hover:brightness-110 transition-all">
-                  Compare
-                </button>
+                <a
+                  href={whatsappOrderUrl(m)}
+                  className="rounded-full bg-brand text-white text-sm font-semibold px-5 py-2 hover:brightness-110 transition-all"
+                >
+                  Buy Ticket
+                </a>
               </div>
             </div>
           ))}

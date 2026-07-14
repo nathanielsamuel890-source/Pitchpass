@@ -3,6 +3,8 @@ export type Fixture = {
   competition: string;
   home: string;
   away: string;
+  homeCrest: string | null;
+  awayCrest: string | null;
   date: string;
   time: string;
   venue: string;
@@ -16,9 +18,13 @@ export type Match = Fixture & {
   fromPrice: number;
   originalPrice: number;
   discountPct: number;
+  seller: string;
+  section: string;
 };
 
 const COLORS = ["#C8102E", "#1E5AA8", "#A50044", "#EE2523", "#5E5CE6", "#16A34A", "#DB7A00"];
+const SELLER_NAMES = ["Football Ticket Net", "StadiumSeats", "MatchDay Resale", "GoalLine Tickets"];
+const SECTIONS = ["Main Stand", "East Stand", "West Stand", "North End", "Family Zone"];
 
 function colorFor(name: string) {
   let hash = 0;
@@ -46,6 +52,8 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       fromPrice,
       originalPrice: original,
       discountPct,
+      seller: SELLER_NAMES[i % SELLER_NAMES.length],
+      section: SECTIONS[i % SECTIONS.length],
     };
   });
 }

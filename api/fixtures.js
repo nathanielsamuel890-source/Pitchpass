@@ -17,8 +17,9 @@ export default async function handler(req, res) {
   }
 
   // Competitions covered by the free tier. Add/remove codes as needed:
-  // PL = Premier League, PD = La Liga (Primera Division), CL = Champions League
-  const competitions = ["PL", "PD"];
+  // PL = Premier League, PD = La Liga (Primera Division)
+  // WC = World Cup, CL = Champions League — both free tier, no key upgrade needed
+  const competitions = ["PL", "PD", "WC", "CL"];
 
   try {
     const results = await Promise.all(
@@ -31,12 +32,14 @@ export default async function handler(req, res) {
 
     const matches = results
       .flatMap((r) => r.matches ?? [])
-      .slice(0, 20)
+      .slice(0, 30)
       .map((m) => ({
         id: String(m.id),
         competition: m.competition?.name ?? "Football",
         home: m.homeTeam?.shortName ?? m.homeTeam?.name ?? "Home",
         away: m.awayTeam?.shortName ?? m.awayTeam?.name ?? "Away",
+        homeCrest: m.homeTeam?.crest ?? null,
+        awayCrest: m.awayTeam?.crest ?? null,
         date: new Date(m.utcDate).toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",
