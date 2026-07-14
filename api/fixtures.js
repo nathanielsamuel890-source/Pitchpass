@@ -6,6 +6,45 @@
 // Division/La Liga, and others) with a request-rate limit — fine for a
 // small site, not for high traffic.
 
+const MANUAL_FIXTURES = [
+  {
+    id: "wc-sf1",
+    competition: "FIFA World Cup",
+    home: "France",
+    away: "Spain",
+    homeCrest: null,
+    awayCrest: null,
+    utcDate: "2026-07-14T19:00:00Z",
+    date: "14 Jul 2026",
+    time: "3:00 PM ET",
+    venue: "AT&T Stadium, Arlington, Texas",
+  },
+  {
+    id: "wc-sf2",
+    competition: "FIFA World Cup",
+    home: "England",
+    away: "Argentina",
+    homeCrest: null,
+    awayCrest: null,
+    utcDate: "2026-07-15T19:00:00Z",
+    date: "15 Jul 2026",
+    time: "3:00 PM ET",
+    venue: "Mercedes-Benz Stadium, Atlanta",
+  },
+  {
+    id: "wc-final",
+    competition: "FIFA World Cup",
+    home: "Winner SF1",
+    away: "Winner SF2",
+    homeCrest: null,
+    awayCrest: null,
+    utcDate: "2026-07-19T19:00:00Z",
+    date: "19 Jul 2026",
+    time: "3:00 PM ET",
+    venue: "MetLife Stadium, East Rutherford, New Jersey",
+  },
+];
+
 export default async function handler(req, res) {
   const apiKey = process.env.FOOTBALL_API_KEY;
 
@@ -30,7 +69,7 @@ export default async function handler(req, res) {
       )
     );
 
-    const matches = results
+    const apiMatches = results
       .flatMap((r) => r.matches ?? [])
       .slice(0, 30)
       .map((m) => ({
@@ -52,6 +91,8 @@ export default async function handler(req, res) {
         }),
         venue: m.venue || `${m.competition?.area?.name ?? ""}`.trim() || "Venue TBC",
       }));
+
+    const matches = [...MANUAL_FIXTURES, ...apiMatches];
 
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate"); // cache 30 min
     return res.status(200).json({ matches });
