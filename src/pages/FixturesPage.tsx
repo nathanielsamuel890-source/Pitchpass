@@ -123,7 +123,71 @@ export default function FixturesPage() {
           </span>
         </div>
       </section>
-
+{/* Top Football Matches carousel */}
+{!loading && !error && matches.length > 0 && (
+  <section className="max-w-3xl mx-auto px-6 pt-8">
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-lg font-bold text-ink">Top Football Matches</h2>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => {
+            const el = document.getElementById("top-matches-scroll");
+            el?.scrollBy({ left: -260, behavior: "smooth" });
+          }}
+          aria-label="Scroll left"
+          className="rounded-full border border-border p-1.5 hover:border-brand"
+        >
+          ←
+        </button>
+        <button
+          onClick={() => {
+            const el = document.getElementById("top-matches-scroll");
+            el?.scrollBy({ left: 260, behavior: "smooth" });
+          }}
+          aria-label="Scroll right"
+          className="rounded-full border border-border p-1.5 hover:border-brand"
+        >
+          →
+        </button>
+      </div>
+    </div>
+    <div
+      id="top-matches-scroll"
+      className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth"
+    >
+      {matches.slice(0, 8).map((m) => (
+        <div
+          key={`top-${m.id}`}
+          className="shrink-0 w-56 rounded-xl border border-border bg-panel overflow-hidden"
+        >
+          <div className="h-24 bg-page flex items-center justify-center gap-3">
+            {m.homeCrest ? (
+              <img src={m.homeCrest} alt={m.home} className="h-10 w-10 object-contain" />
+            ) : (
+              <span className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-50 text-xs font-medium">
+                {m.home.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+            <span className="text-xs text-muted">vs</span>
+            {m.awayCrest ? (
+              <img src={m.awayCrest} alt={m.away} className="h-10 w-10 object-contain" />
+            ) : (
+              <span className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-50 text-xs font-medium">
+                {m.away.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="p-3">
+            <p className="font-semibold text-ink text-sm truncate">
+              {m.home} vs {m.away}
+            </p>
+            <p className="text-xs text-muted mt-1">{m.date}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
       {/* Stats bar */}
       <section className="bg-panel border-y border-border px-6 py-8">
         <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
