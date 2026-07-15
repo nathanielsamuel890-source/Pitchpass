@@ -425,7 +425,7 @@ export default function FixturesPage() {
                   </div>
                   <p className="mt-0.5">
                     <span className="text-xs text-muted">From </span>
-                    <span className="text-lg font-bold text-brand">£{m.fromPrice.toFixed(2)}</span>{" "}
+                    <span className="text-lg font-bold text-brand">{m.currency === "USD" ? "$" : "£"}{m.fromPrice.toFixed(2)}</span>{" "}
                     <span className="text-xs text-muted line-through">
                       £{m.originalPrice.toFixed(2)}
                     </span>
