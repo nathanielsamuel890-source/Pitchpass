@@ -32,5 +32,6 @@ export type ManualPrice = {
 };
 
 export const MANUAL_PRICES: Record<string, ManualPrice> = {
-  // Add your real prices below this line, following the example above.
+  "arsenal vs chelsea": { pitchSide: 120, lowerTier: 90, upperTier: 52 },
+  "england vs argentina": { pitchSide: 8700, lowerTier: 4300, upperTier: 2050, discountPct: 30 },
 };
