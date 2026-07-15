@@ -1,10 +1,32 @@
 // Vercel serverless function — runs on the server, not in the browser.
-// This keeps FOOTBALL_API_KEY hidden from anyone viewing the site's code.
+// This keeps FOOTBALL_API_KEY and SEATGEEK_CLIENT_ID hidden from anyone
+// viewing the site's code.
 //
 // Uses football-data.org's free tier: https://www.football-data.org/
 // Free tier covers a handful of top competitions (Premier League, Primera
 // Division/La Liga, and others) with a request-rate limit — fine for a
 // small site, not for high traffic.
+
+const SEATGEEK_CLIENT_ID = process.env.SEATGEEK_CLIENT_ID;
+
+async function getSeatGeekPricing(home, away) {
+  if (!SEATGEEK_CLIENT_ID) return null;
+  try {
+    const q = encodeURIComponent(`${home} vs ${away}`);
+    const url = `https://api.seatgeek.com/2/events?client_id=${SEATGEEK_CLIENT_ID}&q=${q}&per_page=1`;
+    const r = await fetch(url);
+    const data = await r.json();
+    const event = data.events && data.events[0];
+    if (!event || !event.stats) return null;
+    return {
+      lowest: event.stats.lowest_price ?? null,
+      average: event.stats.average_price ?? null,
+      highest: event.stats.highest_price ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
 
 const MANUAL_FIXTURES = [
   {
@@ -92,13 +114,20 @@ export default async function handler(req, res) {
         venue: m.venue || `${m.competition?.area?.name ?? ""}`.trim() || "Venue TBC",
       }));
 
-    // Auto-hide manual fixtures once their kickoff time has passed
+    // Auto-hide manual fixtures once their kickoff time has passed,
+    // and enrich the still-upcoming ones with real SeatGeek pricing.
     const now = new Date();
     const activeManualFixtures = MANUAL_FIXTURES.filter(
       (f) => new Date(f.utcDate) > now
     );
+    const manualFixturesWithPricing = await Promise.all(
+      activeManualFixtures.map(async (f) => {
+        const sgPricing = await getSeatGeekPricing(f.home, f.away);
+        return sgPricing ? { ...f, sgPricing } : f;
+      })
+    );
 
-    const matches = [...activeManualFixtures, ...apiMatches];
+    const matches = [...manualFixturesWithPricing, ...apiMatches];
 
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate"); // cache 30 min
     return res.status(200).json({ matches });
