@@ -11,6 +11,7 @@ export type Fixture = {
   date: string;
   time: string;
   venue: string;
+  sgPricing?: { lowest: number | null; average: number | null; highest: number | null } | null;
 };
 
 export type PriceTier = {
@@ -41,7 +42,7 @@ const SECTIONS = ["Main Stand", "East Stand", "West Stand", "North End", "Family
 function hashStr(s: string) {
   let hash = 0;
   for (let i = 0; i < s.length; i++) {
-    hash = (s.charCodeAt(i) + ((hash << 5) - hash)) | 0; // keep hash within 32-bit range every step
+    hash = (s.charCodeAt(i) + ((hash << 5) - hash)) | 0;
   }
   return Math.abs(hash);
 }
@@ -52,10 +53,6 @@ function colorFor(name: string) {
 
 const DISCOUNTS = [10, 15, 18, 22, 25, 28, 32, 35, 40];
 
-// Pitch-side seats cost more than upper-tier ones — same pattern as real
-// stadium seat maps (SeatPick, etc). "originalPrice"/"fromPrice" on a Match
-// always reflect the cheapest (Upper Tier) price, matching how ticket
-// sites show a "From £X" headline price on the card.
 const TIERS = [
   { label: "Pitch Side", mult: 1.9 },
   { label: "Lower Tier", mult: 1.3 },
@@ -65,6 +62,9 @@ const TIERS = [
 const MANUAL_LOOKUP = Object.fromEntries(
   Object.entries(MANUAL_PRICES).map(([k, v]) => [k.toLowerCase().trim(), v])
 );
+
+// Rough USD-to-GBP conversion for SeatGeek prices (SeatGeek is US-only pricing)
+const USD_TO_GBP = 0.79;
 
 export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
   return fixtures.map((f, i) => {
@@ -87,12 +87,24 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       ];
       original = tiers[2].originalPrice;
       fromPrice = manual.upperTier;
+    } else if (f.sgPricing && f.sgPricing.lowest && f.sgPricing.highest) {
+      const low = Math.round(f.sgPricing.lowest * USD_TO_GBP * 10) / 10;
+      const avg =
+        Math.round(
+          (f.sgPricing.average ?? (f.sgPricing.lowest + f.sgPricing.highest) / 2) * USD_TO_GBP * 10
+        ) / 10;
+      const high = Math.round(f.sgPricing.highest * USD_TO_GBP * 10) / 10;
+      tiers = [
+        { label: "Pitch Side", price: high, originalPrice: high },
+        { label: "Lower Tier", price: avg, originalPrice: avg },
+        { label: "Upper Tier", price: low, originalPrice: low },
+      ];
+      original = high;
+      discountPct = 0;
+      fromPrice = low;
     } else {
       // PLACEHOLDER PRICING — no free API provides real ticket/seller prices.
-      // This generates plausible-looking numbers so the layout has something
-      // to show. Add a real price in manualPrices.ts to override this for
-      // any specific match.
-      original = 45 + (priceHash % 280); // £45–£325 spread (Upper Tier)
+      original = 45 + (priceHash % 280);
       discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
       fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
       tiers = TIERS.map((t) => {
@@ -103,6 +115,7 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
     }
 
     const trendRoll = (priceHash >> 4) % 3;
+
     return {
       ...f,
       hot: i < 4,
@@ -119,4 +132,4 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       priceTrend: trendRoll === 0 ? "up" : trendRoll === 1 ? "down" : "stable",
     };
   });
-}
+         }
