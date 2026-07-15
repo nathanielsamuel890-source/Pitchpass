@@ -33,6 +33,7 @@ export type Match = Fixture & {
   tiers: PriceTier[];
   viewers: number;
   priceTrend: "up" | "down" | "stable";
+  currency: "GBP" | "USD";
 };
 
 const COLORS = ["#C8102E", "#1E5AA8", "#A50044", "#EE2523", "#5E5CE6", "#16A34A", "#DB7A00"];
@@ -63,7 +64,6 @@ const MANUAL_LOOKUP = Object.fromEntries(
   Object.entries(MANUAL_PRICES).map(([k, v]) => [k.toLowerCase().trim(), v])
 );
 
-// Rough USD-to-GBP conversion for SeatGeek prices (SeatGeek is US-only pricing)
 const USD_TO_GBP = 0.79;
 
 export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
@@ -75,8 +75,10 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
     let discountPct: number;
     let fromPrice: number;
     let tiers: PriceTier[];
+    let currency: "GBP" | "USD" = "GBP";
 
     if (manual) {
+      currency = manual.currency ?? "GBP";
       discountPct = manual.discountPct ?? 0;
       const withDiscount = (real: number) =>
         discountPct > 0 ? Math.round((real / (1 - discountPct / 100)) * 10) / 10 : real;
@@ -103,7 +105,6 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       discountPct = 0;
       fromPrice = low;
     } else {
-      // PLACEHOLDER PRICING — no free API provides real ticket/seller prices.
       original = 45 + (priceHash % 280);
       discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
       fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
@@ -130,6 +131,7 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       tiers,
       viewers: 20 + (priceHash % 400),
       priceTrend: trendRoll === 0 ? "up" : trendRoll === 1 ? "down" : "stable",
+      currency,
     };
   });
-         }
+                      }
