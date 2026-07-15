@@ -485,7 +485,7 @@ export default function FixturesPage() {
                   }`}
                 >
                   <span className="font-medium text-ink">{tier.label}</span>
-                  <span className="font-bold text-brand">£{tier.price.toFixed(2)}</span>
+                  <span className="font-bold text-brand">{quantityFor?.currency === "USD" ? "$" : "£"}{tier.price.toFixed(2)}</span>
                 </button>
               ))}
             </div>
