@@ -288,7 +288,7 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
               <button
                 onClick={() => setView("list")}
                 aria-label="List view"
-                className={rounded-full p-1.5 transition-colors ${
+                className={`rounded-full p-1.5 transition-colors ${
                   view === "list" ? "bg-blue-50 text-brand" : "text-muted"
                 }`}
               >
