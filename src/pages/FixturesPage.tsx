@@ -497,7 +497,7 @@ export default function FixturesPage() {
               {QUANTITY_OPTIONS.map((q) => (
                 <a
                   key={q}
-                  href={whatsappOrderUrl(quantityFor, q, selectedTier)}
+                  href={whatsappOrderUrl(quantityFor, q, selectedListing)}
                   onClick={() => setQuantityFor(null)}
                   className="flex items-center justify-center rounded-xl border border-border py-3 text-ink font-semibold hover:border-brand hover:text-brand hover:bg-blue-50 transition-colors"
                 >
