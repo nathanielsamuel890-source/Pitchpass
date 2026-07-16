@@ -12,6 +12,7 @@ import {
   Users,
   LayoutGrid,
   List as ListIcon,
+  Smartphone,
 } from "lucide-react";
 import { Fixture, Match, PriceTier, Listing, attachPlaceholderPricing } from "../data/matches";
 import { whatsappOrderUrl } from "../lib/whatsapp";
@@ -25,6 +26,21 @@ const STATS = [
 
 const QUANTITY_OPTIONS = ["1", "2", "3", "4", "5", "5+"];
 
+type ListingSort = "best-deal" | "price-low" | "price-high";
+
+// Small mini stadium/pitch thumbnail used on each listing row
+function StadiumThumb() {
+  return (
+    <svg viewBox="0 0 56 56" className="h-full w-full">
+      <rect width="56" height="56" fill="var(--color-page, #f3f4f6)" />
+      <circle cx="28" cy="28" r="22" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
+      <circle cx="28" cy="28" r="14" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
+      <rect x="18" y="20" width="20" height="16" rx="2" fill="#22c55e" opacity="0.9" />
+      <rect x="21" y="23" width="14" height="10" rx="1" fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.7" />
+    </svg>
+  );
+}
+
 export default function FixturesPage() {
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<Match[]>([]);
@@ -35,6 +51,7 @@ export default function FixturesPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [category, setCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<"soonest" | "price-low" | "price-high">("soonest");
+  const [listingSort, setListingSort] = useState<ListingSort>("best-deal");
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +97,13 @@ export default function FixturesPage() {
       return new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime(); // soonest
     });
 
+  const sortedListings = quantityFor
+    ? [...quantityFor.listings].sort((a, b) => {
+        if (listingSort === "price-high") return b.price - a.price;
+        return a.price - b.price; // best-deal and price-low both ascend by price
+      })
+    : [];
+
   return (
     <main>
       {/* Hero */}
@@ -102,7 +126,8 @@ export default function FixturesPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by team, competition, or stadium... e.g. Real Madrid"className="flex-1 bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
+              placeholder="Search by team, competition, or stadium... e.g. Real Madrid"
+              className="flex-1 bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
             />
           </div>
           <button className="rounded-full bg-brand text-white text-sm font-semibold px-6 hover:brightness-110 transition-all">
@@ -122,71 +147,73 @@ export default function FixturesPage() {
           </span>
         </div>
       </section>
-{/* Top Football Matches carousel */}
-{!loading && !error && matches.length > 0 && (
-  <section className="max-w-3xl mx-auto px-6 pt-8">
-    <div className="flex items-center justify-between mb-3">
-      <h2 className="text-lg font-bold text-ink">Top Football Matches</h2>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => {
-            const el = document.getElementById("top-matches-scroll");
-            el?.scrollBy({ left: -260, behavior: "smooth" });
-          }}
-          aria-label="Scroll left"
-          className="rounded-full border border-border p-1.5 hover:border-brand"
-        >
-          ←
-        </button>
-        <button
-          onClick={() => {
-            const el = document.getElementById("top-matches-scroll");
-            el?.scrollBy({ left: 260, behavior: "smooth" });
-          }}
-          aria-label="Scroll right"
-          className="rounded-full border border-border p-1.5 hover:border-brand"
-        >
-          →
-        </button>
-      </div>
-    </div>
-    <div
-      id="top-matches-scroll"
-      className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth"
-    >
-      {matches.slice(0, 8).map((m) => (
-        <div
-          key={top-${m.id}}
-          className="shrink-0 w-56 rounded-xl border border-border bg-panel overflow-hidden"
-        >
-          <div className="h-24 bg-page flex items-center justify-center gap-3">
-            {m.homeCrest ? (
-              <img src={m.homeCrest} alt={m.home} className="h-10 w-10 object-contain" />
-            ) : (
-              <span className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-50 text-xs font-medium">
-                {m.home.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-            <span className="text-xs text-muted">vs</span>
-            {m.awayCrest ? (
-              <img src={m.awayCrest} alt={m.away} className="h-10 w-10 object-contain" />
-            ) : (
-              <span className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-50 text-xs font-medium">
-                {m.away.slice(0, 2).toUpperCase()}
-              </span>
-            )}
+
+      {/* Top Football Matches carousel */}
+      {!loading && !error && matches.length > 0 && (
+        <section className="max-w-3xl mx-auto px-6 pt-8">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-ink">Top Football Matches</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const el = document.getElementById("top-matches-scroll");
+                  el?.scrollBy({ left: -260, behavior: "smooth" });
+                }}
+                aria-label="Scroll left"
+                className="rounded-full border border-border p-1.5 hover:border-brand"
+              >
+                ←
+              </button>
+              <button
+                onClick={() => {
+                  const el = document.getElementById("top-matches-scroll");
+                  el?.scrollBy({ left: 260, behavior: "smooth" });
+                }}
+                aria-label="Scroll right"
+                className="rounded-full border border-border p-1.5 hover:border-brand"
+              >
+                →
+              </button>
+            </div>
           </div>
-          <div className="p-3">
-            <p className="font-semibold text-ink text-sm truncate">
-              {m.home} vs {m.away}
-            </p>
-            <p className="text-xs text-muted mt-1">{m.date}</p>
+          <div
+            id="top-matches-scroll"
+            className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth"
+          >
+            {matches.slice(0, 8).map((m) => (
+              <div
+                key={top-${m.id}}
+                className="shrink-0 w-56 rounded-xl border border-border bg-panel overflow-hidden"
+              >
+                <div className="h-24 bg-page flex items-center justify-center gap-3">
+                  {m.homeCrest ? (
+                    <img src={m.homeCrest} alt={m.home} className="h-10 w-10 object-contain" />
+                  ) : (
+                    <span className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-50 text-xs font-medium">
+                      {m.home.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="text-xs text-muted">vs</span>
+                  {m.awayCrest ? (
+                    <img src={m.awayCrest} alt={m.away} className="h-10 w-10 object-contain" />
+                  ) : (
+                    <span className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-50 text-xs font-medium">
+                      {m.away.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <p className="font-semibold text-ink text-sm truncate">
+                    {m.home} vs {m.away}
+                  </p>
+                  <p className="text-xs text-muted mt-1">{m.date}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
-  </section>
-)}
+        </section>
+      )}
+
       {/* Stats bar */}
       <section className="bg-panel border-y border-border px-6 py-8">
         <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
@@ -198,7 +225,9 @@ export default function FixturesPage() {
             </div>
           ))}
         </div>
-      </section>{/* High-demand matches */}
+      </section>
+
+      {/* High-demand matches */}
       <section className="max-w-3xl mx-auto px-6 py-10">
         {/* Browse by competition */}
         {competitions.length > 0 && (
@@ -250,9 +279,9 @@ export default function FixturesPage() {
               <button
                 onClick={() => setView("grid")}
                 aria-label="Grid view"
-                className={rounded-full p-1.5 transition-colors ${
+                className={`rounded-full p-1.5 transition-colors ${
                   view === "grid" ? "bg-blue-50 text-brand" : "text-muted"
-                }}
+                  }}
               >
                 <LayoutGrid size={16} />
               </button>
@@ -261,7 +290,7 @@ export default function FixturesPage() {
                 aria-label="List view"
                 className={rounded-full p-1.5 transition-colors ${
                   view === "list" ? "bg-blue-50 text-brand" : "text-muted"
-                }}
+                }`}
               >
                 <ListIcon size={16} />
               </button>
@@ -290,16 +319,18 @@ export default function FixturesPage() {
         {!loading && !error && filtered.length > 0 && view === "list" && (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {filtered.map((m) => {
-              const d = new Date(m.utcDate);const dayNum = d.getDate();
+              const d = new Date(m.utcDate);
+              const dayNum = d.getDate();
               const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
               const month = d.toLocaleDateString("en-GB", { month: "short" });
               return (
                 <button
                   key={m.id}
                   onClick={() => {
-  setQuantityFor(m);
-  setSelectedListing(m.listings[0]);
-}}
+                    setQuantityFor(m);
+                    setSelectedListing(m.listings[0]);
+                    setListingSort("best-deal");
+                  }}
                   className="flex items-center gap-4 bg-panel px-4 py-3 text-left hover:bg-page transition-colors"
                 >
                   <div className="flex flex-col items-center justify-center w-12 shrink-0">
@@ -339,106 +370,107 @@ export default function FixturesPage() {
             })}
           </div>
         )}
-
-        {!loading && !error && filtered.length > 0 && view === "grid" && (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {filtered.map((m) => (
-            <div
-              key={m.id}
-              className="rounded-xl border border-border bg-panel p-5 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="flex items-center gap-1 rounded-full bg-page text-muted text-xs px-2.5 py-1">
-                  <Trophy size={11} /> {m.competition}
-                </span>
-                {m.hot && (
-                  <span className="rounded-full bg-blue-50 text-brand text-xs font-medium px-2.5 py-1">
-                    Hot Match
+{!loading && !error && filtered.length > 0 && view === "grid" && (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {filtered.map((m) => (
+              <div
+                key={m.id}
+                className="rounded-xl border border-border bg-panel p-5 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="flex items-center gap-1 rounded-full bg-page text-muted text-xs px-2.5 py-1">
+                    <Trophy size={11} /> {m.competition}
                   </span>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex flex-col items-center gap-1.5 w-20">
-                  {m.homeCrest ? (
-                    <img
-                      src={m.homeCrest}
-                      alt={m.home}
-                      className="h-10 w-10 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <span
-                      className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"style={{ backgroundColor: m.homeColor }}
-                    >
-                      {m.home.slice(0, 2).toUpperCase()}
+                  {m.hot && (
+                    <span className="rounded-full bg-blue-50 text-brand text-xs font-medium px-2.5 py-1">
+                      Hot Match
                     </span>
                   )}
-                  <span className="text-xs font-medium text-ink text-center">{m.home}</span>
                 </div>
-                <span className="text-muted text-xs">vs</span>
-                <div className="flex flex-col items-center gap-1.5 w-20">
-                  {m.awayCrest ? (
-                    <img
-                      src={m.awayCrest}
-                      alt={m.away}
-                      className="h-10 w-10 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <span
-                      className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                      style={{ backgroundColor: m.awayColor }}
-                    >
-                      {m.away.slice(0, 2).toUpperCase()}
-                    </span>
-                  )}
-                  <span className="text-xs font-medium text-ink text-center">{m.away}</span>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-3 text-xs text-muted mb-4">
-                <span className="flex items-center gap-1">
-                  <Calendar size={12} /> {m.date} · {m.time}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin size={12} /> {m.venue}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-border pt-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted">{m.sellers} Sellers</span>
-                    <span className="rounded bg-green-50 text-savings text-xs font-semibold px-1.5 py-0.5">
-                      -{m.discountPct}%
-                    </span>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col items-center gap-1.5 w-20">
+                    {m.homeCrest ? (
+                      <img
+                        src={m.homeCrest}
+                        alt={m.home}
+                        className="h-10 w-10 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                        style={{ backgroundColor: m.homeColor }}
+                      >
+                        {m.home.slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="text-xs font-medium text-ink text-center">{m.home}</span>
                   </div>
-                  <p className="mt-0.5">
-                    <span className="text-xs text-muted">From </span>
-                    <span className="text-lg font-bold text-brand">{m.currency === "USD" ? "$" : "£"}{m.fromPrice.toFixed(2)}</span>{" "}
-                    <span className="text-xs text-muted line-through">
-                      {m.currency === "USD" ? "$" : "£"}{m.originalPrice.toFixed(2)}
-                    </span>
-                  </p>
+                  <span className="text-muted text-xs">vs</span>
+                  <div className="flex flex-col items-center gap-1.5 w-20">
+                    {m.awayCrest ? (
+                      <img
+                        src={m.awayCrest}
+                        alt={m.away}
+                        className="h-10 w-10 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                        style={{ backgroundColor: m.awayColor }}
+                      >
+                        {m.away.slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="text-xs font-medium text-ink text-center">{m.away}</span>
+                  </div>
                 </div>
-                <button
-                  onClick={() => {
-  setQuantityFor(m);
-  setSelectedListing(m.listings[0]);
-}}
-                  className="rounded-full bg-brand text-white text-sm font-semibold px-5 py-2 hover:brightness-110 transition-all"
-                >
-                  Buy Ticket
-                </button>
+
+                <div className="flex items-center gap-3 text-xs text-muted mb-4">
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} /> {m.date} · {m.time}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MapPin size={12} /> {m.venue}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-border pt-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted">{m.sellers} Sellers</span>
+                      <span className="rounded bg-green-50 text-savings text-xs font-semibold px-1.5 py-0.5">
+                        -{m.discountPct}%
+                      </span>
+                    </div>
+                    <p className="mt-0.5">
+                      <span className="text-xs text-muted">From </span>
+                      <span className="text-lg font-bold text-brand">{m.currency === "USD" ? "$" : "£"}{m.fromPrice.toFixed(2)}</span>{" "}
+                      <span className="text-xs text-muted line-through">
+                        {m.currency === "USD" ? "$" : "£"}{m.originalPrice.toFixed(2)}
+                      </span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setQuantityFor(m);
+                      setSelectedListing(m.listings[0]);
+                      setListingSort("best-deal");
+                    }}
+                    className="rounded-full bg-brand text-white text-sm font-semibold px-5 py-2 hover:brightness-110 transition-all"
+                  >
+                    Buy Ticket
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
       </section>
 
@@ -448,7 +480,7 @@ export default function FixturesPage() {
           onClick={() => setQuantityFor(null)}
         >
           <div
-            className="w-full sm:max-w-sm rounded-2xl bg-panel p-5"
+            className="w-full sm:max-w-md rounded-2xl bg-panel p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-1">
@@ -463,34 +495,57 @@ export default function FixturesPage() {
             </div>
             <p className="text-sm text-muted mb-4">
               {quantityFor.home} vs {quantityFor.away}
-            </p><p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
-              {quantityFor.listings.length} Listings
             </p>
-            <div className="flex flex-col gap-2 mb-5 max-h-72 overflow-y-auto">
-              {quantityFor.listings.map((listing) => (
+
+            {/* Listings header: count + sort, like SeatPick */}
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">
+                {quantityFor.listings.length} Listings
+              </p>
+              <select
+                value={listingSort}
+                onChange={(e) => setListingSort(e.target.value as ListingSort)}
+                className="rounded-full border border-border bg-panel px-2.5 py-1 text-xs text-ink focus:outline-none"
+              >
+                <option value="best-deal">Best Deal</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
+
+            {/* Listing cards */}
+            <div className="flex flex-col divide-y divide-border mb-5 max-h-80 overflow-y-auto rounded-xl border border-border">
+              {sortedListings.map((listing) => (
                 <button
                   key={listing.id}
                   onClick={() => setSelectedListing(listing)}
-                  className={flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
-                    selectedListing?.id === listing.id
-                      ? "border-brand bg-blue-50"
-                      : "border-border hover:border-brand"
+                  className={flex items-center gap-3 px-3 py-3 text-left transition-colors ${
+                    selectedListing?.id === listing.id ? "bg-blue-50" : "bg-panel hover:bg-page"
                   }}
                 >
-                  <div>
-                    <p className="font-medium text-ink text-sm">{listing.label}</p>
-                    <p className="text-xs text-muted">
-                      {listing.ticketCount} ·{" "}
-                      <span className="inline-block text-xs font-medium text-brand">
-                        {listing.quality}
-                      </span>
-                    </p>
+                  <div className="shrink-0 w-14 h-14 rounded-lg overflow-hidden border border-border">
+                    <StadiumThumb />
                   </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-ink text-sm truncate">{listing.label}</p>
+                    <p className="text-xs text-muted truncate">{listing.ticketCount}</p>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className="inline-flex items-center gap-1 rounded bg-green-50 text-savings text-[11px] font-semibold px-1.5 py-0.5">
+                        <ShieldCheck size={10} /> {listing.quality}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded bg-page text-muted text-[11px] px-1.5 py-0.5">
+                        <Smartphone size={10} /> Mobile Tickets
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="text-right shrink-0">
-                    <p className="font-bold text-brand">
+                    <p className="font-bold text-ink text-sm">
                       {quantityFor?.currency === "USD" ? "$" : "£"}{listing.price.toFixed(2)}
                     </p>
-                    <p className="text-xs text-muted">{listing.vendor}</p>
+                    <p className="text-[11px] text-muted">each</p>
+                    <p className="text-[11px] text-muted mt-1.5">{listing.vendor}</p>
                   </div>
                 </button>
               ))}
@@ -519,4 +574,4 @@ export default function FixturesPage() {
       )}
     </main>
   );
-}
+                  }
