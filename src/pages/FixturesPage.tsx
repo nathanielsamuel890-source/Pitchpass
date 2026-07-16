@@ -447,7 +447,7 @@ export default function FixturesPage() {
         )}
       </section>
 
-      {quantityFor && selectedTier && (
+{quantityFor && selectedListing && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
           onClick={() => setQuantityFor(null)}
