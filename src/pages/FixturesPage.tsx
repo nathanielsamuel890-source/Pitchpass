@@ -182,7 +182,7 @@ export default function FixturesPage() {
           >
             {matches.slice(0, 8).map((m) => (
               <div
-                key={top-${m.id}}
+                key={`top-${m.id}`}
                 className="shrink-0 w-56 rounded-xl border border-border bg-panel overflow-hidden"
               >
                 <div className="h-24 bg-page flex items-center justify-center gap-3">
