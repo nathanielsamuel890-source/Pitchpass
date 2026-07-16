@@ -519,9 +519,9 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
                 <button
                   key={listing.id}
                   onClick={() => setSelectedListing(listing)}
-                  className={flex items-center gap-3 px-3 py-3 text-left transition-colors ${
-                    selectedListing?.id === listing.id ? "bg-blue-50" : "bg-panel hover:bg-page"
-                  }}
+ className={`flex items-center gap-3 px-3 py-3 text-left transition-colors ${
+  selectedListing?.id === listing.id ? "bg-blue-50" : "bg-panel hover:bg-page"
+}`}
                 >
                   <div className="shrink-0 w-14 h-14 rounded-lg overflow-hidden border border-border">
                     <StadiumThumb />
