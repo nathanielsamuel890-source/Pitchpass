@@ -301,9 +301,9 @@ export default function FixturesPage() {
                 <button
                   key={m.id}
                   onClick={() => {
-                    setQuantityFor(m);
-                    setSelectedTier(m.tiers[m.tiers.length - 1]);
-                  }}
+  setQuantityFor(m);
+  setSelectedListing(m.listings[0]);
+}}
                   className="flex items-center gap-4 bg-panel px-4 py-3 text-left hover:bg-page transition-colors"
                 >
                   <div className="flex flex-col items-center justify-center w-12 shrink-0">
