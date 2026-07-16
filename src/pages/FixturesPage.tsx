@@ -246,11 +246,11 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
               <button
                 key={c}
                 onClick={() => setCategory(c === category ? null : c)}
-                className={whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                  category === c
-                    ? "border-brand bg-blue-50 text-brand"
-                    : "border-border text-muted hover:border-brand"
-                }}
+className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+  category === c
+    ? "border-brand bg-blue-50 text-brand"
+    : "border-border text-muted hover:border-brand"
+}`}
               >
                 {c}
               </button>
