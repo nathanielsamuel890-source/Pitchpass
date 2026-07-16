@@ -281,7 +281,7 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
                 aria-label="Grid view"
                 className={`rounded-full p-1.5 transition-colors ${
                   view === "grid" ? "bg-blue-50 text-brand" : "text-muted"
-                  }}
+                  }`}
               >
                 <LayoutGrid size={16} />
               </button>
