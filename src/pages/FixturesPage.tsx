@@ -31,7 +31,7 @@ export default function FixturesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantityFor, setQuantityFor] = useState<Match | null>(null);
-  const [selectedTier, setSelectedTier] = useState<PriceTier | null>(null);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [category, setCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<"soonest" | "price-low" | "price-high">("soonest");
