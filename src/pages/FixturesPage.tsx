@@ -102,8 +102,7 @@ export default function FixturesPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by team, competition, or stadium... e.g. Real Madrid"
-              className="flex-1 bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
+              placeholder="Search by team, competition, or stadium... e.g. Real Madrid"className="flex-1 bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
             />
           </div>
           <button className="rounded-full bg-brand text-white text-sm font-semibold px-6 hover:brightness-110 transition-all">
@@ -157,7 +156,7 @@ export default function FixturesPage() {
     >
       {matches.slice(0, 8).map((m) => (
         <div
-          key={`top-${m.id}`}
+          key={top-${m.id}}
           className="shrink-0 w-56 rounded-xl border border-border bg-panel overflow-hidden"
         >
           <div className="h-24 bg-page flex items-center justify-center gap-3">
@@ -199,20 +198,18 @@ export default function FixturesPage() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* High-demand matches */}
+      </section>{/* High-demand matches */}
       <section className="max-w-3xl mx-auto px-6 py-10">
         {/* Browse by competition */}
         {competitions.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1">
             <button
               onClick={() => setCategory(null)}
-              className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 category === null
                   ? "border-brand bg-blue-50 text-brand"
                   : "border-border text-muted hover:border-brand"
-              }`}
+              }}
             >
               All
             </button>
@@ -220,11 +217,11 @@ export default function FixturesPage() {
               <button
                 key={c}
                 onClick={() => setCategory(c === category ? null : c)}
-                className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                   category === c
                     ? "border-brand bg-blue-50 text-brand"
                     : "border-border text-muted hover:border-brand"
-                }`}
+                }}
               >
                 {c}
               </button>
@@ -253,18 +250,18 @@ export default function FixturesPage() {
               <button
                 onClick={() => setView("grid")}
                 aria-label="Grid view"
-                className={`rounded-full p-1.5 transition-colors ${
+                className={rounded-full p-1.5 transition-colors ${
                   view === "grid" ? "bg-blue-50 text-brand" : "text-muted"
-                }`}
+                }}
               >
                 <LayoutGrid size={16} />
               </button>
               <button
                 onClick={() => setView("list")}
                 aria-label="List view"
-                className={`rounded-full p-1.5 transition-colors ${
+                className={rounded-full p-1.5 transition-colors ${
                   view === "list" ? "bg-blue-50 text-brand" : "text-muted"
-                }`}
+                }}
               >
                 <ListIcon size={16} />
               </button>
@@ -293,8 +290,7 @@ export default function FixturesPage() {
         {!loading && !error && filtered.length > 0 && view === "list" && (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {filtered.map((m) => {
-              const d = new Date(m.utcDate);
-              const dayNum = d.getDate();
+              const d = new Date(m.utcDate);const dayNum = d.getDate();
               const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
               const month = d.toLocaleDateString("en-GB", { month: "short" });
               return (
@@ -375,8 +371,7 @@ export default function FixturesPage() {
                     />
                   ) : (
                     <span
-                      className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                      style={{ backgroundColor: m.homeColor }}
+                      className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold"style={{ backgroundColor: m.homeColor }}
                     >
                       {m.home.slice(0, 2).toUpperCase()}
                     </span>
@@ -447,7 +442,7 @@ export default function FixturesPage() {
         )}
       </section>
 
-{quantityFor && selectedListing && (
+      {quantityFor && selectedListing && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
           onClick={() => setQuantityFor(null)}
@@ -468,24 +463,35 @@ export default function FixturesPage() {
             </div>
             <p className="text-sm text-muted mb-4">
               {quantityFor.home} vs {quantityFor.away}
+            </p><p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+              {quantityFor.listings.length} Listings
             </p>
-
-    <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
-      Seating tier                                    <-- block starts here
-    </p>
-    <div className="flex flex-col gap-2 mb-5">
-      {quantityFor.tiers.map((tier) => (
-        <button
-          key={tier.label}
-          onClick={() => setSelectedTier(tier)}
-         className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
-          selectedTier.label === tier.label
-              ? "border-brand bg-blue-50"
+            <div className="flex flex-col gap-2 mb-5 max-h-72 overflow-y-auto">
+              {quantityFor.listings.map((listing) => (
+                <button
+                  key={listing.id}
+                  onClick={() => setSelectedListing(listing)}
+                  className={flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
+                    selectedListing?.id === listing.id
+                      ? "border-brand bg-blue-50"
                       : "border-border hover:border-brand"
-                  }`}
+                  }}
                 >
-                  <span className="font-medium text-ink">{tier.label}</span>
-                  <span className="font-bold text-brand">{quantityFor?.currency === "USD" ? "$" : "£"}{tier.price.toFixed(2)}</span>
+                  <div>
+                    <p className="font-medium text-ink text-sm">{listing.label}</p>
+                    <p className="text-xs text-muted">
+                      {listing.ticketCount} ·{" "}
+                      <span className="inline-block text-xs font-medium text-brand">
+                        {listing.quality}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-brand">
+                      {quantityFor?.currency === "USD" ? "$" : "£"}{listing.price.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-muted">{listing.vendor}</p>
+                  </div>
                 </button>
               ))}
             </div>
@@ -495,7 +501,7 @@ export default function FixturesPage() {
             </p>
             <div className="grid grid-cols-3 gap-2">
               {QUANTITY_OPTIONS.map((q) => (
-                <a
+                
                   key={q}
                   href={whatsappOrderUrl(quantityFor, q, selectedListing)}
                   onClick={() => setQuantityFor(null)}
