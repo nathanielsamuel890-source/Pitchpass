@@ -13,7 +13,7 @@ import {
   LayoutGrid,
   List as ListIcon,
 } from "lucide-react";
-import { Fixture, Match, PriceTier, attachPlaceholderPricing } from "../data/matches";
+import { Fixture, Match, PriceTier, Listing, attachPlaceholderPricing } from "../data/matches";
 import { whatsappOrderUrl } from "../lib/whatsapp";
 
 const STATS = [
