@@ -234,11 +234,11 @@ export default function FixturesPage() {
           <div className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1">
             <button
               onClick={() => setCategory(null)}
-              className={whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                category === null
-                  ? "border-brand bg-blue-50 text-brand"
-                  : "border-border text-muted hover:border-brand"
-              }}
+className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+  category === null
+    ? "border-brand bg-blue-50 text-brand"
+    : "border-border text-muted hover:border-brand"
+}`}
             >
               All
             </button>
