@@ -433,9 +433,9 @@ export default function FixturesPage() {
                 </div>
                 <button
                   onClick={() => {
-                    setQuantityFor(m);
-                    setSelectedTier(m.tiers[m.tiers.length - 1]);
-                  }}
+  setQuantityFor(m);
+  setSelectedListing(m.listings[0]);
+}}
                   className="rounded-full bg-brand text-white text-sm font-semibold px-5 py-2 hover:brightness-110 transition-all"
                 >
                   Buy Ticket
