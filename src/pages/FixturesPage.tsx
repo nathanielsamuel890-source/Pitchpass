@@ -470,17 +470,17 @@ export default function FixturesPage() {
               {quantityFor.home} vs {quantityFor.away}
             </p>
 
-            <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
-              Seating tier
-            </p>
-            <div className="flex flex-col gap-2 mb-5">
-              {quantityFor.tiers.map((tier) => (
-                <button
-                  key={tier.label}
-                  onClick={() => setSelectedTier(tier)}
-                  className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
-                    selectedTier.label === tier.label
-                      ? "border-brand bg-blue-50"
+    <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+      Seating tier                                    <-- block starts here
+    </p>
+    <div className="flex flex-col gap-2 mb-5">
+      {quantityFor.tiers.map((tier) => (
+        <button
+          key={tier.label}
+          onClick={() => setSelectedTier(tier)}
+         className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
+          selectedTier.label === tier.label
+              ? "border-brand bg-blue-50"
                       : "border-border hover:border-brand"
                   }`}
                 >
