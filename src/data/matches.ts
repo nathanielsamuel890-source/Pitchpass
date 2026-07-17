@@ -50,14 +50,7 @@ export type Match = Fixture & {
 };
 
 const COLORS = ["#C8102E", "#1E5AA8", "#A50044", "#EE2523", "#5E5CE6", "#16A34A", "#DB7A00"];
-const SELLER_NAMES = [
-  "Football Ticket Net",
-  "StadiumSeats",
-  "MatchDay Resale",
-  "GoalLine Tickets",
-  "PitchPass Verified",
-  "Kickoff Tickets",
-];
+const SELLER_NAMES = ["Football Ticket Net", "StadiumSeats", "MatchDay Resale", "GoalLine Tickets", "PitchPass Verified", "Kickoff Tickets"];
 const SECTIONS = ["Main Stand", "East Stand", "West Stand", "North End", "Family Zone"];
 const QUALITIES: Listing["quality"][] = ["Amazing", "Amazing", "Great", "Great", "Good"];
 
@@ -94,8 +87,8 @@ function generateListings(tiers: PriceTier[], priceHash: number): Listing[] {
     const listingsPerTier = 3 + ((priceHash >> (counter + 2)) % 2);
     for (let j = 0; j < listingsPerTier; j++) {
       const variance = ((priceHash >> (counter + 5)) % 20) - 5;
-      const price = Math.round((tier.price * (1 + variance / 100)) * 10) / 10;
-      const originalPrice = Math.round((tier.originalPrice * (1 + variance / 100)) * 10) / 10;
+      const price = Math.round(tier.price * (1 + variance / 100) * 10) / 10;
+      const originalPrice = Math.round(tier.originalPrice * (1 + variance / 100) * 10) / 10;
       const sectionNum = 100 + ((priceHash >> (counter + 1)) % 400);
       const rowNum = 1 + ((priceHash >> (counter + 3)) % 20);
       const ticketCount = 1 + ((priceHash >> (counter + 4)) % 6);
@@ -117,54 +110,78 @@ function generateListings(tiers: PriceTier[], priceHash: number): Listing[] {
       counter++;
     }
   });
-  return listings;
+  return listings.sort((a, b) => a.price - b.price);
 }
 
 export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
-  return fixtures.map((f) => {
-    const key = `${f.home}-${f.away}-${f.id}`;
-    const hash = hashStr(key);
-    const manualKey = `${f.home}-${f.away}`.toLowerCase().trim();
-    const manualPrice = MANUAL_LOOKUP[manualKey];
+  return fixtures.map((f, i) => {
+    const priceHash = hashStr(f.id + f.home + f.away);
+    const manualKey = `${f.home} vs ${f.away}`.toLowerCase().trim();
+    const manual = MANUAL_LOOKUP[manualKey];
 
-    const basePrice = manualPrice
-      ? Number(manualPrice)
-      : 30 + (hash % 120);
+    let original: number;
+    let discountPct: number;
+    let fromPrice: number;
+    let tiers: PriceTier[];
+    let currency: "GBP" | "USD" = "GBP";
 
-    const tiers: PriceTier[] = TIERS.map((t) => ({
-      label: t.label,
-      price: Math.round(basePrice * t.mult * 10) / 10,
-      originalPrice: Math.round(basePrice * t.mult * 1.12 * 10) / 10,
-    }));
+    if (manual) {
+      currency = manual.currency ?? "GBP";
+      discountPct = manual.discountPct ?? 0;
+      const withDiscount = (real: number) =>
+        discountPct > 0 ? Math.round((real / (1 - discountPct / 100)) * 10) / 10 : real;
+      tiers = [
+        { label: "Pitch Side", price: manual.pitchSide, originalPrice: withDiscount(manual.pitchSide) },
+        { label: "Lower Tier", price: manual.lowerTier, originalPrice: withDiscount(manual.lowerTier) },
+        { label: "Upper Tier", price: manual.upperTier, originalPrice: withDiscount(manual.upperTier) },
+      ];
+      original = tiers[2].originalPrice;
+      fromPrice = manual.upperTier;
+    } else if (f.sgPricing && f.sgPricing.lowest && f.sgPricing.highest) {
+      const low = Math.round(f.sgPricing.lowest * USD_TO_GBP * 10) / 10;
+      const avg =
+        Math.round(
+          (f.sgPricing.average ?? (f.sgPricing.lowest + f.sgPricing.highest) / 2) * USD_TO_GBP * 10
+        ) / 10;
+      const high = Math.round(f.sgPricing.highest * USD_TO_GBP * 10) / 10;
+      tiers = [
+        { label: "Pitch Side", price: high, originalPrice: high },
+        { label: "Lower Tier", price: avg, originalPrice: avg },
+        { label: "Upper Tier", price: low, originalPrice: low },
+      ];
+      original = high;
+      discountPct = 0;
+      fromPrice = low;
+    } else {
+      original = 45 + (priceHash % 280);
+      discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
+      fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
+      tiers = TIERS.map((t) => {
+        const tierOriginal = Math.round(original * t.mult);
+        const tierPrice = Math.round(tierOriginal * (1 - discountPct / 100) * 10) / 10;
+        return { label: t.label, price: tierPrice, originalPrice: tierOriginal };
+      });
+    }
 
-    const listings = generateListings(tiers, hash);
-    const fromPrice = Math.min(...tiers.map((t) => t.price));
-    const originalPrice = Math.min(...tiers.map((t) => t.originalPrice));
-    const discountPct = DISCOUNTS[hash % DISCOUNTS.length];
-    const seller = SELLER_NAMES[hash % SELLER_NAMES.length];
-    const section = SECTIONS[hash % SECTIONS.length];
-    const sellers = new Set(listings.map((l) => l.vendor)).size;
-    const viewers = 5 + (hash % 45);
-    const trends: Match["priceTrend"][] = ["up", "down", "stable"];
-    const priceTrend = trends[hash % trends.length];
-    const hot = hash % 5 === 0;
+    const trendRoll = (priceHash >> 4) % 3;
+    const listings = generateListings(tiers, priceHash);
 
     return {
       ...f,
-      hot,
+      hot: i < 4,
       homeColor: colorFor(f.home),
       awayColor: colorFor(f.away),
-      sellers,
-      fromPrice,
-      originalPrice,
+      sellers: 2 + (priceHash % 8),
+      fromPrice: listings[0]?.price ?? fromPrice,
+      originalPrice: original,
       discountPct,
-      seller,
-      section,
+      seller: SELLER_NAMES[priceHash % SELLER_NAMES.length],
+      section: SECTIONS[(priceHash >> 2) % SECTIONS.length],
       tiers,
       listings,
-      viewers,
-      priceTrend,
-      currency: "GBP",
+      viewers: 20 + (priceHash % 400),
+      priceTrend: trendRoll === 0 ? "up" : trendRoll === 1 ? "down" : "stable",
+      currency,
     };
   });
-}
+  }
