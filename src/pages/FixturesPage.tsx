@@ -556,7 +556,7 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
             </p>
             <div className="grid grid-cols-3 gap-2">
               {QUANTITY_OPTIONS.map((q) => (
-                
+                <a
                   key={q}
                   href={whatsappOrderUrl(quantityFor, q, selectedListing)}
                   onClick={() => setQuantityFor(null)}
