@@ -28,6 +28,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <div className="min-h-screen bg-page">
+      <CurrencyProvider>
       <Navbar />
       <ErrorBoundary>
         <Routes>
