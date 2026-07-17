@@ -450,12 +450,12 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
                       </span>
                     </div>
                     <p className="mt-0.5">
-                      <span className="text-xs text-muted">From </span>
-                      <span className="text-lg font-bold text-brand">{m.currency === "USD" ? "$" : "£"}{m.fromPrice.toFixed(2)}</span>{" "}
-                      <span className="text-xs text-muted line-through">
-                        {m.currency === "USD" ? "$" : "£"}{m.originalPrice.toFixed(2)}
-                      </span>
-                    </p>
+  <span className="text-xs text-muted">From </span>
+  <Price amount={m.fromPrice} from={m.currency} className="text-lg font-bold text-brand" />
+  <span className="text-xs text-muted line-through">
+    <Price amount={m.originalPrice} from={m.currency} />
+  </span>
+</p>
                   </div>
                   <button
                     onClick={() => {
