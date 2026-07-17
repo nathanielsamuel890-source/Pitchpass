@@ -6,7 +6,7 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import FixturesPage from "./pages/FixturesPage";
 import MyTicketsPage from "./pages/MyTicketsPage";
-
+import { CurrencyProvider } from "./context/CurrencyContext";
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useUser();
 
