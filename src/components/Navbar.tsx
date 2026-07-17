@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Ticket } from "lucide-react";
-
+import CurrencySelector from "./CurrencySelector";
 export default function Navbar() {
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-panel">
