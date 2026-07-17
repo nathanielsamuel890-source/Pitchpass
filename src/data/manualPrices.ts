@@ -35,4 +35,4 @@ export type ManualPrice = {
 export const MANUAL_PRICES: Record<string, ManualPrice> = {
   "arsenal vs chelsea": { pitchSide: 120, lowerTier: 90, upperTier: 52 },
   "england vs argentina": {pitchSide: 11000, lowerTier: 5400, upperTier: 2600, discountPct: 30, currency: "USD"},
-};
+"argentina vs spain": { pitchSide: 6080, lowerTier: 4160, upperTier: 3200, currency: "USD", discountPct: 30 },};
