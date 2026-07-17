@@ -363,7 +363,7 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs text-muted">From</p>
-                    <p className="font-bold text-brand">{m.currency === "USD" ? "$" : "£"}{m.fromPrice.toFixed(2)}+</p>
+                    <Price amount={m.fromPrice} from={m.currency} className="font-bold text-brand" />
                   </div>
                 </button>
               );
