@@ -46,6 +46,7 @@ export default function App() {
           />
         </Routes>
       </ErrorBoundary>
+        </CurrencyProvider>
     </div>
   );
 }
