@@ -36,6 +36,7 @@ export default function Navbar() {
             Sign Up
           </Link>
         </SignedOut>
+        <CurrencySelector />
       </div>
     </header>
   );
