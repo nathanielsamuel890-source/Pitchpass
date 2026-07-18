@@ -14,8 +14,10 @@ export default function Navbar() {
         <Link to="/fixtures" className="text-muted hover:text-ink transition-colors">
           All Matches
         </Link>
-
-        <SignedIn>
+<Link to="/how-it-works" className="text-muted hover:text-ink transition-colors">
+  How It Works
+</Link>
+       <SignedIn>
           <Link to="/my-tickets" className="text-muted hover:text-ink transition-colors">
             My Tickets
           </Link>
