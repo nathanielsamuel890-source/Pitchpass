@@ -542,8 +542,8 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
 
                   <div className="text-right shrink-0">
                     <p className="font-bold text-ink text-sm">
-                      {quantityFor?.currency === "USD" ? "$" : "£"}{listing.price.toFixed(2)}
-                    </p>
+  <Price amount={listing.price} from={quantityFor?.currency ?? "GBP"} />
+</p>
                     <p className="text-[11px] text-muted">each</p>
                     <p className="text-[11px] text-muted mt-1.5">{listing.vendor}</p>
                   </div>
