@@ -15,6 +15,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { Fixture, Match, PriceTier, Listing, attachPlaceholderPricing } from "../data/matches";
+import Price from "../components/Price";
 import { whatsappOrderUrl } from "../lib/whatsapp";
 
 const STATS = [
