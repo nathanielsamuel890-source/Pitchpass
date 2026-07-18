@@ -37,6 +37,7 @@ export default function App() {
           <Route path="/sign-in/*" element={<SignInPage />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />
           <Route path="/fixtures" element={<FixturesPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route
             path="/my-tickets"
             element={
