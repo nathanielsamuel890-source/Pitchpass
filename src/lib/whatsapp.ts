@@ -16,3 +16,8 @@ export function whatsappOrderUrl(m: Match, quantity: string, tier: PriceTier) {
   const text = encodeURIComponent(buildOrderMessage(m, quantity, tier));
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
 }
+
+export function whatsappSupportUrl() {
+  const text = encodeURIComponent("Hi! I have a question about PitchPass.");
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+}

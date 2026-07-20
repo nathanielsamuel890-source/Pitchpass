@@ -7,6 +7,7 @@ import SignUpPage from "./pages/SignUpPage";
 import FixturesPage from "./pages/FixturesPage"; 
 import MyTicketsPage from "./pages/MyTicketsPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
+import SupportPage from "./pages/SupportPage";
 import { CurrencyProvider } from "./context/CurrencyContext";
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useUser();
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/sign-up/*" element={<SignUpPage />} />
           <Route path="/fixtures" element={<FixturesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/support" element={<SupportPage />} />
           <Route
             path="/my-tickets"
             element={

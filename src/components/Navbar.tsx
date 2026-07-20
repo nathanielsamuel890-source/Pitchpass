@@ -17,6 +17,9 @@ export default function Navbar() {
 <Link to="/how-it-works" className="text-muted hover:text-ink transition-colors">
   How It Works
 </Link>
+<Link to="/support" className="text-muted hover:text-ink transition-colors">
+  Support
+</Link>
        <SignedIn>
           <Link to="/my-tickets" className="text-muted hover:text-ink transition-colors">
             My Tickets
