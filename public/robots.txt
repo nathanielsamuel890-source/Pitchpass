@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pitchpass-two.vercel.app/sitemap.xml
