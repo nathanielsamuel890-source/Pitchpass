@@ -47,6 +47,7 @@ export type Match = Fixture & {
   viewers: number;
   priceTrend: "up" | "down" | "stable";
   currency: "GBP" | "USD";
+  isEstimated: boolean;
 };
 
 const COLORS = ["#C8102E", "#1E5AA8", "#A50044", "#EE2523", "#5E5CE6", "#16A34A", "#DB7A00"];
@@ -182,6 +183,7 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       viewers: 20 + (priceHash % 400),
       priceTrend: trendRoll === 0 ? "up" : trendRoll === 1 ? "down" : "stable",
       currency,
+      isEstimated: !manual,
     };
   });
   }
