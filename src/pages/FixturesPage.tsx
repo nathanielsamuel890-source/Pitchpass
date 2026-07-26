@@ -457,6 +457,9 @@ className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-mediu
     <Price amount={m.originalPrice} from={m.currency} />
   </span>
 </p>
+                    {m.isEstimated && (
+  <p className="text-xs text-muted mt-0.5">Estimated pricing</p>
+)}
                   </div>
                   <button
                     onClick={() => {
