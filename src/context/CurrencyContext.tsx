@@ -21,7 +21,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("pitchpass_currency");
-    if (saved) setCurrency(saved);
+    if (saved) {
+      setCurrency(saved);
+    } else {
+      const lang = navigator.language || "";
+      const usdLocales = ["en-US", "en-CA"];
+      const detected = usdLocales.some((l) => lang.startsWith(l)) ? "USD" : "GBP";
+      setCurrency(detected);
+    }
   }, []);
 
   useEffect(() => {
