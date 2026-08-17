@@ -2,7 +2,7 @@ import { Match, PriceTier } from "../data/matches";
 
 // The number tickets orders are sent to. Digits only, no "+", spaces, or
 // dashes (wa.me requires this format) — include the country code.
-const WHATSAPP_NUMBER = "13434839896";
+const WHATSAPP_NUMBER = "447735028033";
 
 export function buildOrderMessage(m: Match, quantity: string, tier: PriceTier) {
   return (
