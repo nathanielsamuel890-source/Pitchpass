@@ -145,14 +145,14 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
           (f.sgPricing.average ?? (f.sgPricing.lowest + f.sgPricing.highest) / 2) * USD_TO_GBP * 10
         ) / 10;
       const high = Math.round(f.sgPricing.highest * USD_TO_GBP * 10) / 10;
-      tiers = [
-        { label: "Pitch Side", price: high, originalPrice: high },
-        { label: "Lower Tier", price: avg, originalPrice: avg },
-        { label: "Upper Tier", price: low, originalPrice: low },
-      ];
-      original = high;
-      discountPct = 0;
-      fromPrice = low;
+      discountPct = GLOBAL_DISCOUNT_PCT;
+        tiers = [
+          { label: "Pitch Side", price: Math.round(high * (1 - discountPct / 100) * 10) / 10, originalPrice: high },
+          { label: "Lower Tier", price: Math.round(avg * (1 - discountPct / 100) * 10) / 10, originalPrice: avg },
+          { label: "Upper Tier", price: Math.round(low * (1 - discountPct / 100) * 10) / 10, originalPrice: low },
+        ];
+        original = high;
+        fromPrice = Math.round(low * (1 - discountPct / 100) * 10) / 10;
     } else {
       original = 45 + (priceHash % 280);
       discountPct = GLOBAL_DISCOUNT_PCT;
