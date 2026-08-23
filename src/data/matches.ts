@@ -80,7 +80,7 @@ const MANUAL_LOOKUP = Object.fromEntries(
 );
 
 const USD_TO_GBP = 0.79;
-
+const GLOBAL_DISCOUNT_PCT = 60; // temporary sitewide discount — set to 0 to turn off
 function generateListings(tiers: PriceTier[], priceHash: number): Listing[] {
   const listings: Listing[] = [];
   let counter = 0;
