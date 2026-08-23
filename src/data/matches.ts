@@ -155,7 +155,7 @@ export function attachPlaceholderPricing(fixtures: Fixture[]): Match[] {
       fromPrice = low;
     } else {
       original = 45 + (priceHash % 280);
-      discountPct = DISCOUNTS[(priceHash >> 3) % DISCOUNTS.length];
+      discountPct = GLOBAL_DISCOUNT_PCT;
       fromPrice = Math.round(original * (1 - discountPct / 100) * 10) / 10;
       tiers = TIERS.map((t) => {
         const tierOriginal = Math.round(original * t.mult);
