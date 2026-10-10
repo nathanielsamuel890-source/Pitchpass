@@ -87,7 +87,12 @@ export default async function handler(req, res) {
       competitions.map((code) =>
         fetch(`https://api.football-data.org/v4/competitions/${code}/matches?status=SCHEDULED`, {
           headers: { "X-Auth-Token": apiKey },
-        }).then((r) => r.json())
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            console.log(`[${code}] matches: ${data.matches?.length ?? 0}, error: ${data.message ?? data.errorCode ?? "none"}`);
+            return data;
+          })
       )
     );
 
